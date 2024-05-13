@@ -20,7 +20,7 @@ export const Datatable = () => {
     const [globalFilterValue, setGlobalFilterValue] = useState('');
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+        fname: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         representative: { value: null, matchMode: FilterMatchMode.IN },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
         verified: { value: null, matchMode: FilterMatchMode.EQUALS }
@@ -31,23 +31,23 @@ export const Datatable = () => {
         {
           label: "View",
           icon: "pi pi-user",
-          command: (e) => {
-            console.log(e, data);
+          command: () => {
+            console.log(data.fname);
           },
         },
         {
           label: "Delete",
           icon: "pi pi-times",
-          command: (e) => {
-            console.log(data['name']);
-            setProducts(products.filter((product) => product.name != data['name']))
+          command: () => {
+            console.log(data.fname);
+            setProducts(products.filter((product) => product.fname != data.fname))
           },
         },
       ]);
       
 
       const splitBtn = (d) => {
-        console.log(d);
+        console.log(d.fname);
        
         /* Getting data here*/
       };
@@ -65,8 +65,11 @@ export const Datatable = () => {
       
 
     useEffect(() => {
-        ProductService.getProductsSmall().then((data) => setProducts(data));
-        initFilters();
+        // ProductService.getProductsSmall().then((data) => setProducts(data));
+        // initFilters();
+         fetch('http://127.0.0.1:5000/getAllPatients')
+        .then(response => response.json())
+        .then(data => { setProducts(data); initFilters(); });
     }, []);
   
     const formatCurrency = (value) => {
@@ -80,7 +83,8 @@ export const Datatable = () => {
     const priceBodyTemplate = (product) => {
         return formatCurrency(product.price);
     };
-  
+
+
     const ratingBodyTemplate = (product) => {
         return <Rating value={product.rating} readOnly cancel={false} />;
     };
@@ -107,13 +111,13 @@ export const Datatable = () => {
   
     const getSeverity = (product) => {
         switch (product.inventoryStatus) {
-            case 'INSTOCK':
+            case 'OPEN':
                 return 'success';
   
-            case 'LOWSTOCK':
+            case 'IN PROCESS':
                 return 'warning';
   
-            case 'OUTOFSTOCK':
+            case 'COMPLETED':
                 return 'danger';
   
             default:
@@ -172,15 +176,19 @@ export const Datatable = () => {
     return (
         <div className="card" style={{width:'100%', height:'100vh'}}>
             <h1>Manage Appointments</h1>
-            <DataTable scrollable showGridlines  paginator rows={5} rowsPerPageOptions={[5, 10, 25, 50]} filters={filters} globalFilterFields={['name', 'country.name', 'representative.name', 'status']} filterDisplay="row" emptyMessage="No patients found." value={products} header={header} footer={footer} tableStyle={{ minWidth: '60rem' }}>
-                <Column field="name" header="First Name"  sortable style={{ width: '25%' }}></Column>
-              
-                <Column field="price" header="Last Name" body={priceBodyTemplate} sortable style={{ width: '25%' }}></Column>
+            {products.length > 1 ? <DataTable showGridlines filters={filters} globalFilterFields={['fname', 'country.name', 'representative.name', 'status']} paginator rows={5} rowsPerPageOptions={[5, 10, 25, 50]} value={products} header={header} footer={footer} tableStyle={{ minWidth: '60rem' }}>
+                <Column field="fname" header="First Name"   sortable style={{ width: '20%' }}></Column>
+                <Column field="lname" header="Last Name"  sortable style={{ width: '20%' }}></Column>
+                <Column field="gender" header="Gender"  sortable style={{ width: '10%' }}></Column>
+                <Column field="DOB" header="DOB"  sortable style={{ width: '10%' }}></Column>
+                <Column header="Status" body={statusBodyTemplate} style={{ width: '15%' }}></Column>
+               <Column header="Report" body={buttonTemplate} style={{ width: '10%' }}></Column>
+                {/* <Column field="price" header="Last Name" body={priceBodyTemplate} sortable style={{ width: '25%' }}></Column>
                 <Column field="category" header="Gender"  sortable style={{ width: '25%' }}></Column>
                 <Column field="rating" header="Date of Birth" body={ratingBodyTemplate}  sortable style={{ width: '25%' }}></Column>
                 <Column header="Status" body={statusBodyTemplate}></Column>
-                <Column header="Report" body={buttonTemplate}></Column>
-            </DataTable>
+                <Column header="Report" body={buttonTemplate}></Column> */}
+            </DataTable> : <div>loading </div> }
         </div>
     );
 }

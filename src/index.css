@@ -20,8 +20,8 @@ body {
 }
 
 #sbutton:hover{
-  /* background-color: #FFF; */
-  color: #0D1321;
-  /* border:3px solid  green; */
-  /* padding: 2px; */
+  background-color: #FFF;
+  color: #41BC63;
+  border:3px solid  green;
+  padding: 2px;
 }
